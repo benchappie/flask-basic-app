@@ -1,0 +1,88 @@
+{% extends "base.html" %} {% block title %} Workouts {% endblock %}
+
+{% block content %}
+
+<form method="POST">
+    <br />
+    <h2 align="center">Enter Your Workout Here</h3>
+
+    <div class="form-group" style="padding: 10px;">
+        <label for="exercise">Exercise</label>
+        <input
+            type="exercise"
+            class="form-control"
+            id="exercise"
+            name="exercise"
+            placeholder="Enter exercise"
+        />
+    </div>
+
+    <div style="width: 100%;">
+        <div class="form-group" style="width: 33%; float: left; padding: 10px;">
+            <label for="reps">Number of Reps</label>
+            <input
+                type="reps"
+                class="form-control"
+                id="reps"
+                name="reps"
+                placeholder="Enter number of reps"
+            />
+        </div>   
+        <div class="form-group" style="width: 33%; float: left; padding: 10px;">
+            <label for="weight">Weight</label>
+            <input
+                type="weight"
+                class="form-control"
+                id="weight"
+                name="weight"
+                placeholder="Enter weight used"
+            />
+        </div>
+        <div class="form-group" style="width: 25%; float: left; padding: 10px;">
+            <label for="weight"># Sets at this reps & weight</label>
+            <input
+                type="sets"
+                class="form-control"
+                id="sets"
+                name="sets"
+                placeholder="1"
+            />
+        </div>
+
+    </div>
+    
+    <button type="submit" class="btn btn-primary">Submit</button> 
+    
+</form>
+
+<br />
+<h2 align="center">Workouts Recap</h1>
+<br />
+<table class="table table-bordered">
+    <thead class="thead-light text-center">
+        <tr>
+        <th scope="col">Date</th>
+        <th scope="col">Exercise</th>
+        <th scope="col">Reps</th>
+        <th scope="col">Weight</th>
+        <th scope="col"><p style="color:Tomato">Delete</p></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for set in user.sets %}
+        <tr>
+            <td>{{ set.date.strftime('%Y-%m-%d') }}</td>
+            <td>{{ set.exercise }}</td>
+            <td>{{ set.reps }}</td>
+            <td>{{ set.weight }}</td>
+            <td>
+                <button type="button" class="close" onClick="deleteSet('{{ set.id }}')">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </td>
+        </tr>
+        {% endfor %}          
+    </tbody>
+</table>
+
+{% endblock %}
