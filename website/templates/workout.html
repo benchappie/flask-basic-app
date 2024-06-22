@@ -2,9 +2,23 @@
 
 {% block content %}
 
+<style>
+    td, th {
+      width: 100%;
+      border: .5px solid black;
+    }
+    
+    table {
+        border: .5px solid black;
+        border-collapse: collapse;
+        width: 100%;
+        height: 150px;
+    }
+</style>
+
 <form method="POST">
     <br />
-    <h2 align="center">Enter Your Workout Here</h3>
+    <h2 align="center">Enter Your Workout</h2>
 
     <div class="form-group" style="padding: 10px;">
         <label for="exercise">Exercise</label>
@@ -48,24 +62,187 @@
                 placeholder="1"
             />
         </div>
-
+        <div>
+            <button type="submit" class="btn btn-primary" style="float: right;">Submit</button> 
+        </div>
     </div>
-    
-    <button type="submit" class="btn btn-primary">Submit</button> 
-    
+    <br />
+    <br />
 </form>
+<br />
+<br />
+<br />
+
+<h2 align="center">Charts</h2>
+<br />
+
+<div class="container"> 
+    <table class="table"> 
+        <tr> 
+            <td><canvas id="cumulative_sets" height="300" width="500"></canvas>
+            </td> 
+            <td><canvas id="cumulative_reps" height="300" width="500"></canvas>
+            </td> 
+        </tr> 
+        <tr> 
+            <td><canvas id="cumulative_power" height="300" width="500"></canvas>
+            </td> 
+            <td><canvas id="max_weight" height="300" width="500"></canvas>
+            </td> 
+        </tr> 
+    </table> 
+</div>
+
+
+{% block javascript %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    
+    let sets_count = JSON.parse({{ set_data | tojson }});
+
+    let start = new Date(),
+    end = new Date();
+    start.setDate(start.getDate() - 7); // set to 'now' minus 7 days.
+    start.setHours(0, 0, 0, 0); // set to midnight.
+
+    let chart = new Chart(document.getElementById("cumulative_sets"), {
+        type: "line",
+        data: {
+            labels: [],
+        datasets: [{
+            label: 'Cumulative Number of Sets',
+            data: [sets_count],
+            borderColor: '#ff3366',
+            backgroundColor: '#ff3366',
+            },]
+        },
+        options: {
+            interaction: {
+            mode: 'index',
+            intersect: true,
+        },
+            stacked: false,
+            responsive: true,
+
+        scales: {
+            y: {
+                type: 'linear',
+                display: true,
+                position: 'left',
+            },
+            // x: [{
+            //     type: 'time',
+            //     time: {
+            //         // Luxon format string
+            //         tooltipFormat: 'DD T'
+            //     },
+            //     title: {
+            //         display: true,
+            //         text: 'Date'
+            //     }
+            // }]
+        }
+        }
+    });
+
+    chart.render();
+
+    for (let i = 0; i < 7; i++) {
+        var labelDate = start;
+        labelDate.setDate(start.getDate() + 1);
+        chart.data.labels.push(labelDate.toLocaleString())
+    }
+
+    chart.update();
+  
+    
+    let reps_count = JSON.parse({{ reps_data | tojson }});
+
+    const ctx_repsOutput = document.getElementById('cumulative_reps');
+
+    new Chart(ctx_repsOutput, {
+        type: 'bar',
+        data: {
+            datasets: [{
+            label: 'Cumulative Number of Reps',
+            data: reps_count, 
+            borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: false,
+            scales: {
+            y: {
+                beginAtZero: true
+            }
+            }
+        }
+        });    
+    
+    let power_total = JSON.parse({{ power_data | tojson }});
+
+    const ctx_powerOutput = document.getElementById('cumulative_power');
+    
+    new Chart(ctx_powerOutput, {
+        type: 'bar',
+        data: {
+            datasets: [{
+            label: 'Cumulative Power Output (weighted only exercises)',
+            data: power_total, 
+            borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: false,
+            scales: {
+            y: {
+                beginAtZero: true
+            }
+            }
+        }
+        });
+
+    let max_weight = JSON.parse({{ max_data | tojson }});
+
+    const ctx_maxOutput = document.getElementById('max_weight');
+
+    new Chart(ctx_maxOutput, {
+        type: 'line',
+        data: {
+            datasets: [{
+            label: 'Maximum Weight Achieved',
+            data: max_weight, 
+            borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: false,
+            scales: {
+            y: {
+                beginAtZero: true
+            }
+            }
+        }
+    });
+
+</script>
+
+    
+
+{% endblock %}
 
 <br />
-<h2 align="center">Workouts Recap</h1>
+<h2 align="center">History</h2>
 <br />
-<table class="table table-bordered">
+<table class="table table-bordered" style="width: 100%;">
     <thead class="thead-light text-center">
         <tr>
-        <th scope="col">Date</th>
-        <th scope="col">Exercise</th>
-        <th scope="col">Reps</th>
-        <th scope="col">Weight</th>
-        <th scope="col"><p style="color:Tomato">Delete</p></th>
+            <th scope="col">Date</th>
+            <th scope="col">Exercise</th>
+            <th scope="col">Reps</th>
+            <th scope="col">Weight</th>
+            <th scope="col"><p style="color:Tomato">Delete</p></th>
         </tr>
     </thead>
     <tbody>
@@ -84,5 +261,6 @@
         {% endfor %}          
     </tbody>
 </table>
+<br />
 
 {% endblock %}
